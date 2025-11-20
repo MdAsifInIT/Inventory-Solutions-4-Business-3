@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, StyleSheet, Button, TouchableOpacity, Alert } from 'react-native';
-import { CameraView, Camera } from "expo-camera";
+import { CameraView, useCameraPermissions } from "expo-camera";
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ScannerScreen({ navigation }) {
-    const [hasPermission, setHasPermission] = useState(null);
+    const [permission, requestPermission] = useCameraPermissions();
     const [scanned, setScanned] = useState(false);
 
     useEffect(() => {
-        const getCameraPermissions = async () => {
-            const { status } = await Camera.requestCameraPermissionsAsync();
-            setHasPermission(status === "granted");
-        };
+        if (!permission) {
+            requestPermission();
+        }
+    }, [permission]);
 
-        getCameraPermissions();
-    }, []);
+    const hasPermission = permission?.granted;
 
     const handleBarCodeScanned = ({ type, data }) => {
         setScanned(true);

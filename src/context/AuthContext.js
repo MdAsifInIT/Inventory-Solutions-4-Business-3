@@ -5,8 +5,17 @@ import { Platform } from "react-native";
 import Constants from "expo-constants";
 
 // API base URL is provided via Expo config (app.config.js -> extra.apiUrl)
-export const API_URL =
-  Constants.expoConfig?.extra?.apiUrl || "http://localhost:5000/api";
+const getBaseUrl = () => {
+  if (Constants.expoConfig?.extra?.apiUrl) {
+    return Constants.expoConfig.extra.apiUrl;
+  }
+  if (Platform.OS === "android") {
+    return "http://10.0.2.2:5000/api";
+  }
+  return "http://localhost:5000/api";
+};
+
+export const API_URL = getBaseUrl();
 
 const AuthContext = createContext(null);
 
