@@ -1,0 +1,156 @@
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useCart } from '../context/CartContext';
+import { Calendar, Check, AlertCircle, ShoppingCart } from 'lucide-react';
+
+export default function ProductDetails() {
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const { addToCart } = useCart();
+    
+    const [product, setProduct] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [quantity, setQuantity] = useState(1);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        fetchProduct();
+    }, [id]);
+
+    const fetchProduct = async () => {
+        try {
+            const { data } = await axios.get(`/api/products/${id}`);
+            if (data.success) setProduct(data.data);
+        } catch (err) {
+            setError('Product not found');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAddToCart = () => {
+        if (!startDate || !endDate) {
+            alert('Please select rental dates');
+            return;
+        }
+        
+        addToCart(product, quantity, startDate, endDate, product.pricing.day);
+        navigate('/cart');
+    };
+
+    if (loading) return <div className="p-8 text-center">Loading...</div>;
+    if (error || !product) return <div className="p-8 text-center text-red-500">Product not found</div>;
+
+    return (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                {/* Image Gallery */}
+                <div className="space-y-4">
+                    <div className="aspect-w-4 aspect-h-3 bg-gray-100 rounded-lg overflow-hidden">
+                        {product.images && product.images.length > 0 ? (
+                            <img 
+                                src={product.images[0]} 
+                                alt={product.name} 
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="w-full h-96 flex items-center justify-center bg-gray-200 text-gray-400">
+                                No Image Available
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Product Info */}
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
+                    <p className="text-sm text-gray-500 mb-6">SKU: {product.sku}</p>
+                    
+                    <div className="flex items-center space-x-4 mb-8">
+                        <div className="text-center px-4 py-2 bg-gray-50 rounded-lg border border-gray-200">
+                            <span className="block text-2xl font-bold text-gray-900">₹{product.pricing.day}</span>
+                            <span className="text-xs text-gray-500">Daily</span>
+                        </div>
+                        <div className="text-center px-4 py-2 bg-gray-50 rounded-lg border border-gray-200">
+                            <span className="block text-2xl font-bold text-gray-900">₹{product.pricing.week}</span>
+                            <span className="text-xs text-gray-500">Weekly</span>
+                        </div>
+                        <div className="text-center px-4 py-2 bg-gray-50 rounded-lg border border-gray-200">
+                            <span className="block text-2xl font-bold text-gray-900">₹{product.pricing.month}</span>
+                            <span className="text-xs text-gray-500">Monthly</span>
+                        </div>
+                    </div>
+
+                    <div className="prose prose-indigo text-gray-600 mb-8">
+                        <p>{product.description}</p>
+                    </div>
+
+                    {/* Rental Options */}
+                    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                        <h3 className="text-lg font-medium text-gray-900 mb-4">Check Availability & Rent</h3>
+                        
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                                <input 
+                                    type="date" 
+                                    className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border p-2"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    min={new Date().toISOString().split('T')[0]}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                                <input 
+                                    type="date" 
+                                    className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border p-2"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                    min={startDate || new Date().toISOString().split('T')[0]}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                            <select 
+                                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border p-2"
+                                value={quantity}
+                                onChange={(e) => setQuantity(Number(e.target.value))}
+                            >
+                                {[...Array(Math.min(10, product.totalStock)).keys()].map(n => (
+                                    <option key={n+1} value={n+1}>{n+1}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <button 
+                            onClick={handleAddToCart}
+                            disabled={product.totalStock === 0}
+                            className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        >
+                            <ShoppingCart className="mr-2" />
+                            {product.totalStock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                        </button>
+                        
+                        {product.totalStock > 0 ? (
+                            <p className="mt-4 flex items-center text-sm text-green-600">
+                                <Check size={16} className="mr-1" />
+                                {product.totalStock} units available in stock
+                            </p>
+                        ) : (
+                            <p className="mt-4 flex items-center text-sm text-red-600">
+                                <AlertCircle size={16} className="mr-1" />
+                                Currently unavailable
+                            </p>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

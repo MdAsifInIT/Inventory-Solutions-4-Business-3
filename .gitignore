@@ -1,0 +1,12 @@
+node_modules
+.DS_Store
+dist
+build
+coverage
+.vscode
+.idea
+
+
+# Environment variables
+server/.env
+.env
