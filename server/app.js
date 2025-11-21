@@ -24,6 +24,16 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
 
+// Health Check Endpoint (before rate limiting)
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || "development",
+  });
+});
+
 // Rate Limiting
 const { apiLimiter } = require("./middleware/limiter");
 app.use("/api", apiLimiter);
