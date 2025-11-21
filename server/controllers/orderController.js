@@ -13,10 +13,19 @@ exports.createOrder = async (req, res, next) => {
     return res.status(400).json({ success: false, error: "No order items" });
   }
 
-  const session = await Order.startSession();
+  let session = null;
+  let useTransaction = true;
 
   try {
-    session.startTransaction();
+    // Try to start session/transaction (requires replica set)
+    try {
+      session = await Order.startSession();
+      session.startTransaction();
+    } catch (err) {
+      // Transactions not supported, fallback to non-transactional
+      console.warn('Transactions not supported, using non-transactional approach');
+      useTransaction = false;
+    }
 
     // 1. Validate Stock & Create Reservations
     for (const item of items) {
