@@ -23,7 +23,7 @@ export default function ProductCatalog() {
 
     const fetchCategories = async () => {
         try {
-            const { data } = await axios.get('/api/categories');
+            const { data } = await api.get('/categories');
             if (data.success) setCategories(data.data);
         } catch (err) {
             console.error(err);
@@ -33,12 +33,12 @@ export default function ProductCatalog() {
     const fetchProducts = async () => {
         setLoading(true);
         try {
-            let query = '/api/products?';
+            let query = '/products?';
             if (categoryFilter) query += `category=${categoryFilter}&`;
             // Note: Backend search implementation might be needed for 'search' param if not using client-side filtering
             // For now, we'll fetch all and filter client-side if needed, or assume backend supports basic filters
             
-            const { data } = await axios.get(query);
+            const { data } = await api.get(query);
             if (data.success) {
                 let filtered = data.data;
                 if (searchTerm) {
