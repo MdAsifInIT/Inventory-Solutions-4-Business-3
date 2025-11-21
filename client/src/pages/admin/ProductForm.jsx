@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../../utils/api";
 import { Save, ArrowLeft } from "lucide-react";
 
 export default function ProductForm() {
