@@ -37,7 +37,7 @@ exports.register = async (req, res, next) => {
       role,
     });
 
-    sendTokenResponse(user, 201, res);
+    sendTokenResponse(user, 201, res, req);
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
   }
