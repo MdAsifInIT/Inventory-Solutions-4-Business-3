@@ -139,3 +139,78 @@ exports.getOrderById = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Scan order QR code (for pickup/return)
+// @route   POST /api/orders/:id/scan
+// @access  Private (Admin/Staff only)
+exports.scanOrder = async (req, res, next) => {
+  try {
+    const order = await Order.findById(req.params.id).populate("user", "name email");
+
+    if (!order) {
+      return res.status(404).json({ success: false, error: "Order not found" });
+    }
+
+    // Only Admin/Staff can scan orders
+    if (req.user.role !== "Admin" && req.user.role !== "Staff") {
+      return res.status(403).json({ 
+        success: false, 
+        error: "Only admin/staff can scan orders" 
+      });
+    }
+
+    // Determine action based on order status
+    let message = "";
+    let newStatus = order.status;
+
+    switch (order.status.toLowerCase()) {
+      case "pending":
+      case "confirmed":
+        // Mark as picked up
+        newStatus = "Active";
+        message = `Order picked up by ${order.user.name}`;
+        break;
+      case "active":
+        // Mark as returned
+        newStatus = "Completed";
+        message = `Order returned by ${order.user.name}`;
+        
+        // Update reservations to completed
+        await Reservation.updateMany(
+          { order: order._id },
+          { status: "Completed" }
+        );
+        break;
+      case "completed":
+        message = "Order already completed";
+        break;
+      case "cancelled":
+        return res.status(400).json({ 
+          success: false, 
+          error: "Cannot scan cancelled order" 
+        });
+      default:
+        message = "Order scanned successfully";
+    }
+
+    // Update order status if changed
+    if (newStatus !== order.status) {
+      order.status = newStatus;
+      await order.save();
+    }
+
+    res.json({ 
+      success: true, 
+      message,
+      data: {
+        orderId: order._id,
+        status: order.status,
+        customer: order.user.name,
+        items: order.items.length
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
