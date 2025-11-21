@@ -78,7 +78,7 @@ exports.login = async (req, res, next) => {
         .json({ success: false, error: "Invalid credentials" });
     }
 
-    sendTokenResponse(user, 200, res);
+    sendTokenResponse(user, 200, res, req);
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
   }
