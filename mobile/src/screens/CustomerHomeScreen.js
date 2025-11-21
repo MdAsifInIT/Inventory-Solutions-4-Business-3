@@ -94,11 +94,9 @@ export default function CustomerHomeScreen({ navigation }) {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 px-4 pt-2">
-      <View className="mb-4 flex-row justify-between items-center">
+      <View className="mb-4">
         <Text className="text-2xl font-bold text-gray-900">Discover Gear</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Cart")}>
-          <Text className="text-indigo-600 font-medium">Cart</Text>
-        </TouchableOpacity>
+        <Text className="text-gray-500 text-sm mt-1">Rent premium equipment</Text>
       </View>
       <FlatList
         data={products}
