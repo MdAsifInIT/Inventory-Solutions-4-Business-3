@@ -13,19 +13,10 @@ exports.createOrder = async (req, res, next) => {
     return res.status(400).json({ success: false, error: "No order items" });
   }
 
-  let session = null;
-  let useTransaction = true;
-
+  // Skip transactions for non-replica set MongoDB (development mode)
+  const useTransaction = false;
+  
   try {
-    // Try to start session/transaction (requires replica set)
-    try {
-      session = await Order.startSession();
-      session.startTransaction();
-    } catch (err) {
-      // Transactions not supported, fallback to non-transactional
-      console.warn('Transactions not supported, using non-transactional approach');
-      useTransaction = false;
-    }
 
     // 1. Validate Stock & Check Availability
     for (const item of items) {
