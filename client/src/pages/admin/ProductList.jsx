@@ -15,7 +15,7 @@ export default function ProductList() {
 
     const fetchProducts = async () => {
         try {
-            const { data } = await axios.get('/api/products');
+            const { data } = await api.get('/products');
             if (data.success) {
                 setProducts(data.data);
             }
@@ -29,7 +29,7 @@ export default function ProductList() {
     const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this product?')) {
             try {
-                await axios.delete(`/api/products/${id}`);
+                await api.delete(`/products/${id}`);
                 setProducts(products.filter(p => p._id !== id));
             } catch (err) {
                 alert('Failed to delete product');
