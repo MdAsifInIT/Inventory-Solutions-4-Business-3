@@ -14,4 +14,9 @@ export default defineConfig({
       },
     },
   },
+  preview: {
+    port: 3000,
+    host: "0.0.0.0",
+    allowedHosts: ["f8aac8f3-b486-4d9e-8aa4-03298c78edd5.preview.emergentagent.com"]
+  },
 });
