@@ -28,7 +28,10 @@ const userSchema = new mongoose.Schema({
     },
     refreshTokens: [{
         token: String,
-        createdAt: { type: Date, default: Date.now }
+        createdAt: { type: Date, default: Date.now },
+        deviceInfo: String, // User agent
+        ipAddress: String,
+        expiresAt: Date
     }],
     createdAt: {
         type: Date,
