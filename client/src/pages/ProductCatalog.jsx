@@ -114,45 +114,69 @@ export default function ProductCatalog() {
                     {loading ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {[1, 2, 3, 4, 5, 6].map(n => (
-                                <div key={n} className="bg-white rounded-lg shadow-sm border border-gray-200 h-80 animate-pulse"></div>
+                                <ProductCardSkeleton key={n} />
                             ))}
                         </div>
+                    ) : products.length === 0 ? (
+                        <EmptyState
+                            type="products"
+                            title="No products found"
+                            description="We couldn't find any products matching your criteria. Try adjusting your filters or search terms."
+                            actionLabel="Clear Filters"
+                            onAction={() => setSearchParams({})}
+                        />
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {products.map(product => (
-                                <Link key={product._id} to={`/products/${product._id}`} className="group bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                                    <div className="aspect-w-4 aspect-h-3 bg-gray-200 relative">
-                                        {product.images && product.images.length > 0 ? (
-                                            <img 
-                                                src={product.images[0]} 
-                                                alt={product.name} 
-                                                className="w-full h-48 object-cover group-hover:opacity-90 transition-opacity"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-48 flex items-center justify-center text-gray-400">
-                                                <Search size={48} />
-                                            </div>
-                                        )}
-                                        {product.totalStock === 0 && (
-                                            <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
-                                                Out of Stock
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="p-4">
-                                        <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-indigo-600">{product.name}</h3>
-                                        <p className="text-sm text-gray-500 mb-3 line-clamp-2">{product.description}</p>
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <span className="text-lg font-bold text-gray-900">₹{product.pricing.day}</span>
-                                                <span className="text-xs text-gray-500">/day</span>
-                                            </div>
-                                            <span className="text-indigo-600 text-sm font-medium hover:underline">View Details</span>
+                        <motion.div 
+                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            {products.map((product, index) => (
+                                <motion.div
+                                    key={product._id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                                >
+                                    <Link 
+                                        to={`/products/${product._id}`} 
+                                        className="group block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                                    >
+                                        <div className="aspect-w-4 aspect-h-3 bg-gray-200 relative overflow-hidden">
+                                            {product.images && product.images.length > 0 ? (
+                                                <img 
+                                                    src={product.images[0]} 
+                                                    alt={product.name} 
+                                                    className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                                                    loading="lazy"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-48 flex items-center justify-center text-gray-400">
+                                                    <Search size={48} />
+                                                </div>
+                                            )}
+                                            {product.totalStock === 0 && (
+                                                <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow-md">
+                                                    Out of Stock
+                                                </div>
+                                            )}
                                         </div>
-                                    </div>
-                                </Link>
+                                        <div className="p-4">
+                                            <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-indigo-600 transition-colors">{product.name}</h3>
+                                            <p className="text-sm text-gray-500 mb-3 line-clamp-2">{product.description}</p>
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <span className="text-lg font-bold text-gray-900">₹{product.pricing.day}</span>
+                                                    <span className="text-xs text-gray-500">/day</span>
+                                                </div>
+                                                <span className="text-indigo-600 text-sm font-medium group-hover:underline">View Details →</span>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                </motion.div>
                             ))}
-                        </div>
+                        </motion.div>
                     )}
                 </div>
             </div>
