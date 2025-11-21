@@ -33,7 +33,7 @@ const seedData = async () => {
         name: 'Customer User',
         email: 'customer@test.com',
         password: 'password123',
-        role: 'Customer'
+        role: 'Viewer'
       }
     ];
 
