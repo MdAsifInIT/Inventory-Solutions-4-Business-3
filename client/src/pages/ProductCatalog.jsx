@@ -11,6 +11,7 @@ export default function ProductCatalog() {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
     
     const categoryFilter = searchParams.get('category');
     const searchTerm = searchParams.get('search') || '';
