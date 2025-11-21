@@ -86,13 +86,19 @@ export default function ProductDetails() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                 {/* Image Gallery */}
-                <div className="space-y-4">
-                    <div className="aspect-w-4 aspect-h-3 bg-gray-100 rounded-lg overflow-hidden">
+                <motion.div 
+                    className="space-y-4"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    <div className="aspect-w-4 aspect-h-3 bg-gray-100 rounded-lg overflow-hidden shadow-lg">
                         {product.images && product.images.length > 0 ? (
                             <img 
                                 src={product.images[0]} 
                                 alt={product.name} 
-                                className="w-full h-full object-cover"
+                                className="w-full h-96 object-cover"
+                                loading="lazy"
                             />
                         ) : (
                             <div className="w-full h-96 flex items-center justify-center bg-gray-200 text-gray-400">
@@ -100,7 +106,7 @@ export default function ProductDetails() {
                             </div>
                         )}
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Product Info */}
                 <div>
