@@ -85,29 +85,54 @@ exports.login = async (req, res, next) => {
 };
 
 // Get token from model, create cookie and send response
-const sendTokenResponse = async (user, statusCode, res) => {
+const sendTokenResponse = async (user, statusCode, res, req) => {
   const accessToken = generateAccessToken(user._id);
   const refreshToken = generateRefreshToken(user._id);
 
-  // Save refresh token to database
-  user.refreshTokens.push({ token: refreshToken });
+  // Get device and IP info
+  const deviceInfo = req.headers['user-agent'] || 'Unknown';
+  const ipAddress = req.ip || req.connection.remoteAddress || 'Unknown';
+
+  // Save refresh token to database with metadata
+  user.refreshTokens.push({ 
+    token: refreshToken,
+    deviceInfo,
+    ipAddress,
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+  });
+
+  // Limit stored refresh tokens to last 5 per user (prevent token bloat)
+  if (user.refreshTokens.length > 5) {
+    user.refreshTokens = user.refreshTokens.slice(-5);
+  }
+
   await user.save();
 
-  const options = {
+  // Cookie options for access token
+  const accessOptions = {
     expires: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+  };
+
+  // Cookie options for refresh token
+  const refreshOptions = {
+    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
   };
 
   res
     .status(statusCode)
-    .cookie("token", accessToken, options)
+    .cookie("token", accessToken, accessOptions)
+    .cookie("refreshToken", refreshToken, refreshOptions)
     .json({
       success: true,
       token: accessToken, // For mobile apps using Bearer token
       accessToken,
-      refreshToken, // Client should store this securely (e.g., in memory or silent refresh)
+      refreshToken, // Client should store this securely
       user: {
         id: user._id,
         name: user.name,
