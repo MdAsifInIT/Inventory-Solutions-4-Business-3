@@ -55,6 +55,7 @@ const seedData = async () => {
     const products = [
       {
         name: 'Canon EOS R5',
+        sku: 'CAM-R5-001',
         description: 'Professional mirrorless camera with 45MP full-frame sensor',
         category: createdCategories[0]._id,
         pricing: { day: 500, week: 3000, month: 10000 },
@@ -63,6 +64,7 @@ const seedData = async () => {
       },
       {
         name: 'MacBook Pro 16"',
+        sku: 'LAP-MBP-001',
         description: 'M3 Max chip with 64GB RAM, perfect for video editing',
         category: createdCategories[1]._id,
         pricing: { day: 800, week: 5000, month: 18000 },
@@ -71,6 +73,7 @@ const seedData = async () => {
       },
       {
         name: 'Sony A7 III',
+        sku: 'CAM-A7-001',
         description: 'Full-frame mirrorless camera with excellent low-light performance',
         category: createdCategories[0]._id,
         pricing: { day: 400, week: 2500, month: 8500 },
@@ -79,6 +82,7 @@ const seedData = async () => {
       },
       {
         name: 'Rode NTG4+',
+        sku: 'AUD-NTG-001',
         description: 'Professional shotgun microphone with digital switching',
         category: createdCategories[2]._id,
         pricing: { day: 100, week: 600, month: 2000 },
@@ -87,6 +91,7 @@ const seedData = async () => {
       },
       {
         name: 'Aputure 300d II',
+        sku: 'LGT-300D-001',
         description: 'Powerful LED light with wireless control',
         category: createdCategories[3]._id,
         pricing: { day: 200, week: 1200, month: 4000 },
@@ -95,6 +100,7 @@ const seedData = async () => {
       },
       {
         name: 'DJI Ronin RS3',
+        sku: 'CAM-RON-001',
         description: 'Professional 3-axis gimbal stabilizer',
         category: createdCategories[0]._id,
         pricing: { day: 300, week: 1800, month: 6000 },
@@ -103,6 +109,7 @@ const seedData = async () => {
       },
       {
         name: 'Shure SM7B',
+        sku: 'AUD-SM7-001',
         description: 'Professional broadcast microphone',
         category: createdCategories[2]._id,
         pricing: { day: 80, week: 500, month: 1800 },
@@ -111,6 +118,7 @@ const seedData = async () => {
       },
       {
         name: 'Dell XPS 15',
+        sku: 'LAP-XPS-001',
         description: 'Powerful laptop with 4K display',
         category: createdCategories[1]._id,
         pricing: { day: 300, week: 1800, month: 6000 },
