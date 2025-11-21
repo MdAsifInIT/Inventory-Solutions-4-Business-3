@@ -55,7 +55,9 @@ function App() {
     <AuthProvider>
         <CartProvider>
             <Router>
-                <Routes>
+                <ToastContainer />
+                <AnimatePresence mode="wait">
+                    <Routes>
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     
