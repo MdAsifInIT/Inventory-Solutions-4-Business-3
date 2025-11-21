@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import axios from 'axios';
 import { Filter, Search } from 'lucide-react';
+import { ProductCardSkeleton } from '../components/LoadingSkeleton';
+import EmptyState from '../components/EmptyState';
 
 export default function ProductCatalog() {
     const [products, setProducts] = useState([]);
