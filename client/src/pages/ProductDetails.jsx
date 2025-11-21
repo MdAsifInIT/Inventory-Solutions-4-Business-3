@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import axios from 'axios';
 import { useCart } from '../context/CartContext';
-import { Calendar, Check, AlertCircle, ShoppingCart } from 'lucide-react';
+import { Calendar, Check, AlertCircle, ShoppingCart, ArrowLeft } from 'lucide-react';
+import { ProductDetailSkeleton } from '../components/LoadingSkeleton';
+import Button from '../components/Button';
 
 export default function ProductDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { addToCart } = useCart();
+    const { addToCart, calculateRentalPrice } = useCart();
     
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -15,6 +19,7 @@ export default function ProductDetails() {
     const [endDate, setEndDate] = useState('');
     const [quantity, setQuantity] = useState(1);
     const [error, setError] = useState(null);
+    const [estimatedPrice, setEstimatedPrice] = useState(0);
 
     useEffect(() => {
         fetchProduct();
