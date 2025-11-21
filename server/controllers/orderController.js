@@ -1,6 +1,7 @@
 const Order = require("../models/Order");
 const Reservation = require("../models/Reservation");
 const Product = require("../models/Product");
+const InventoryLedger = require("../models/InventoryLedger");
 
 // @desc    Create new order
 // @route   POST /api/orders
