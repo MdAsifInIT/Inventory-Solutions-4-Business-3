@@ -70,7 +70,20 @@ export default function ProductDetails() {
     );
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <motion.div 
+            className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+        >
+            <button 
+                onClick={() => navigate(-1)}
+                className="flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+            >
+                <ArrowLeft size={20} className="mr-2" />
+                Back
+            </button>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                 {/* Image Gallery */}
                 <div className="space-y-4">
