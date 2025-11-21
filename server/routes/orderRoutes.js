@@ -59,8 +59,10 @@ router
     createOrder
   );
 
-router.route("/myorders").get(protect, getMyOrders);
+router.route("/my").get(protect, getMyOrders);
 
 router.route("/:id").get(protect, getOrderById);
+
+router.route("/:id/scan").post(protect, scanOrder);
 
 module.exports = router;
