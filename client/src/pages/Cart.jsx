@@ -85,17 +85,21 @@ export default function Cart() {
                                         </div>
                                     </div>
 
-                                    <div className="ml-0 sm:ml-6 mt-4 sm:mt-0">
-                                        <button 
-                                            onClick={() => removeFromCart(index)}
-                                            className="text-red-500 hover:text-red-700 p-2"
-                                        >
-                                            <Trash2 size={20} />
-                                        </button>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
+                                        <div className="ml-0 sm:ml-6 mt-4 sm:mt-0">
+                                            <motion.button 
+                                                whileHover={{ scale: 1.1 }}
+                                                whileTap={{ scale: 0.9 }}
+                                                onClick={() => handleRemove(index, item.product.name)}
+                                                className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                                                aria-label="Remove from cart"
+                                            >
+                                                <Trash2 size={20} />
+                                            </motion.button>
+                                        </div>
+                                    </motion.li>
+                                ))}
+                            </ul>
+                        </AnimatePresence>
                     </div>
                 </div>
 
