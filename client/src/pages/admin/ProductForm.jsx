@@ -36,7 +36,7 @@ export default function ProductForm() {
 
   const fetchCategories = async () => {
     try {
-      const { data } = await axios.get("/api/categories");
+      const { data } = await api.get("/categories");
       if (data.success) {
         setCategories(data.data);
       }
@@ -47,7 +47,7 @@ export default function ProductForm() {
 
   const fetchProduct = async () => {
     try {
-      const { data } = await axios.get(`/api/products/${id}`);
+      const { data } = await api.get(`/products/${id}`);
       if (data.success) {
         const product = data.data;
         setFormData({
