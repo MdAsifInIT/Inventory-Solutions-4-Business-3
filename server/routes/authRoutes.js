@@ -45,7 +45,8 @@ router.post(
   login
 );
 
-router.get("/logout", logout);
+router.post("/refresh", refreshToken);
+router.post("/logout", protect, logout);
 router.get("/me", protect, getMe);
 
 module.exports = router;
