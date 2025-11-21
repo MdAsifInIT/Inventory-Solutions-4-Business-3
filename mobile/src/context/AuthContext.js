@@ -160,8 +160,13 @@ export const AuthProvider = ({ children }) => {
         password,
       });
       if (data.success) {
-        const accessToken = data.token; // Assuming API returns token in body for mobile
+        const accessToken = data.token || data.accessToken;
+        const refreshToken = data.refreshToken;
+        
         await saveItem("token", accessToken);
+        if (refreshToken) {
+          await saveItem("refreshToken", refreshToken);
+        }
         setToken(accessToken);
 
         // Fetch user details immediately
@@ -188,10 +193,23 @@ export const AuthProvider = ({ children }) => {
         password,
       });
       if (data.success) {
-        const accessToken = data.token;
+        const accessToken = data.token || data.accessToken;
+        const refreshToken = data.refreshToken;
+        
         await saveItem("token", accessToken);
+        if (refreshToken) {
+          await saveItem("refreshToken", refreshToken);
+        }
         setToken(accessToken);
-        setUser(data.user); // Assuming register returns user object
+        
+        // Set user from response or fetch it
+        if (data.user) {
+          setUser(data.user);
+        } else {
+          api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+          const userRes = await api.get(`/auth/me`);
+          setUser(userRes.data.data);
+        }
         return { success: true };
       }
     } catch (error) {
@@ -203,7 +221,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    try {
+      // Call logout endpoint to revoke tokens
+      await api.post(`/auth/logout`);
+    } catch (error) {
+      console.log("Logout API call failed", error);
+    }
+    
     await deleteItem("token");
+    await deleteItem("refreshToken");
     setToken(null);
     setUser(null);
     delete api.defaults.headers.common["Authorization"];
