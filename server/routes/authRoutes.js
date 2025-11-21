@@ -4,6 +4,7 @@ const {
   login,
   logout,
   getMe,
+  refreshToken,
 } = require("../controllers/authController");
 const { protect } = require("../middleware/authMiddleware");
 const { authLimiter } = require("../middleware/limiter");
