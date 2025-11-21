@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 
 const AuthContext = createContext();
 
@@ -10,17 +10,13 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Configure axios defaults
-    axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    axios.defaults.withCredentials = true;
-
     useEffect(() => {
         checkUserLoggedIn();
     }, []);
 
     const checkUserLoggedIn = async () => {
         try {
-            const { data } = await axios.get('/api/auth/me');
+            const { data } = await api.get('/auth/me');
             if (data.success) {
                 setUser(data.data);
             }
@@ -35,10 +31,16 @@ export const AuthProvider = ({ children }) => {
     const login = async (email, password) => {
         try {
             setError(null);
-            const { data } = await axios.post('/api/auth/login', { email, password });
+            const { data } = await api.post('/auth/login', { email, password });
             if (data.success) {
                 setUser(data.user);
-                // Token is handled by cookie
+                // Store tokens for mobile compatibility
+                if (data.accessToken) {
+                    localStorage.setItem('accessToken', data.accessToken);
+                }
+                if (data.refreshToken) {
+                    localStorage.setItem('refreshToken', data.refreshToken);
+                }
                 return true;
             }
         } catch (err) {
@@ -50,9 +52,16 @@ export const AuthProvider = ({ children }) => {
     const register = async (name, email, password, role = 'Viewer') => {
         try {
             setError(null);
-            const { data } = await axios.post('/api/auth/register', { name, email, password, role });
+            const { data } = await api.post('/auth/register', { name, email, password, role });
             if (data.success) {
                 setUser(data.user);
+                // Store tokens for mobile compatibility
+                if (data.accessToken) {
+                    localStorage.setItem('accessToken', data.accessToken);
+                }
+                if (data.refreshToken) {
+                    localStorage.setItem('refreshToken', data.refreshToken);
+                }
                 return true;
             }
         } catch (err) {
@@ -63,8 +72,11 @@ export const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         try {
-            await axios.post('/api/auth/logout');
+            await api.post('/auth/logout');
             setUser(null);
+            // Clear stored tokens
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
         } catch (err) {
             console.error(err);
         }
