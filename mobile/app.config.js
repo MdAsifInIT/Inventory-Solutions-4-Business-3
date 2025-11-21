@@ -6,7 +6,7 @@ export default ({ config }) => ({
     ...appJson.expo,
     extra: {
       ...appJson.expo?.extra,
-      apiUrl: process.env.EXPO_PUBLIC_API_URL || "http://localhost:5000/api",
+      apiUrl: process.env.EXPO_PUBLIC_API_URL || "http://localhost:5000/api/v1",
     },
   },
 });
