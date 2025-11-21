@@ -195,6 +195,6 @@ export default function ProductDetails() {
                     </div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 }
