@@ -30,15 +30,32 @@ export default function Cart() {
     }
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
+        <motion.div 
+            className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+        >
+            <div className="flex items-center mb-8">
+                <ShoppingBag className="mr-3 text-indigo-600" size={32} />
+                <h1 className="text-3xl font-bold text-gray-900">Shopping Cart</h1>
+                <span className="ml-3 text-lg text-gray-500">({cart.length} {cart.length === 1 ? 'item' : 'items'})</span>
+            </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                 <div className="lg:col-span-8">
                     <div className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
-                        <ul className="divide-y divide-gray-200">
-                            {cart.map((item, index) => (
-                                <li key={index} className="p-6 flex flex-col sm:flex-row items-start sm:items-center">
+                        <AnimatePresence>
+                            <ul className="divide-y divide-gray-200">
+                                {cart.map((item, index) => (
+                                    <motion.li 
+                                        key={index}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: 20 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="p-6 flex flex-col sm:flex-row items-start sm:items-center hover:bg-gray-50 transition-colors"
+                                    >
                                     <div className="flex-shrink-0 w-24 h-24 bg-gray-100 rounded-md overflow-hidden mb-4 sm:mb-0">
                                         {item.product.images && item.product.images[0] ? (
                                             <img src={item.product.images[0]} alt={item.product.name} className="w-full h-full object-cover" />
