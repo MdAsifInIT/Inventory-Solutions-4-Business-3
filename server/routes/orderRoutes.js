@@ -3,6 +3,7 @@ const {
   createOrder,
   getMyOrders,
   getOrderById,
+  scanOrder,
 } = require("../controllers/orderController");
 const { protect } = require("../middleware/authMiddleware");
 const { check, validationResult } = require("express-validator");
