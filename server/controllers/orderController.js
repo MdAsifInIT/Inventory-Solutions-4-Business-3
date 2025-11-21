@@ -27,15 +27,16 @@ exports.createOrder = async (req, res, next) => {
       useTransaction = false;
     }
 
-    // 1. Validate Stock & Create Reservations
+    // 1. Validate Stock & Check Availability
     for (const item of items) {
-      const product = await Product.findById(item.product).session(session);
+      const queryOptions = useTransaction ? { session } : {};
+      const product = await Product.findById(item.product).session(session || undefined);
       if (!product) {
         throw new Error(`Product not found: ${item.name}`);
       }
 
       // Check for overlapping reservations
-      const overlappingReservations = await Reservation.find({
+      const reservationQuery = {
         product: item.product,
         status: "Active",
         $or: [
@@ -44,7 +45,11 @@ exports.createOrder = async (req, res, next) => {
             endDate: { $gt: new Date(item.startDate) },
           },
         ],
-      }).session(session);
+      };
+
+      const overlappingReservations = useTransaction 
+        ? await Reservation.find(reservationQuery).session(session)
+        : await Reservation.find(reservationQuery);
 
       const reservedQuantity = overlappingReservations.reduce(
         (acc, res) => acc + res.quantity,
@@ -68,42 +73,48 @@ exports.createOrder = async (req, res, next) => {
       paymentMethod,
     });
 
-    const createdOrder = await order.save({ session });
+    const createdOrder = useTransaction 
+      ? await order.save({ session })
+      : await order.save();
 
-    // 3. Create Reservation Records & Inventory Ledger Entries
+    // 3. Create Reservation Records & Inventory Ledger Entries (atomically)
     for (const item of items) {
       // Create reservation
-      await Reservation.create(
-        [
-          {
-            product: item.product,
-            order: createdOrder._id,
-            user: req.user._id,
-            startDate: item.startDate,
-            endDate: item.endDate,
-            quantity: item.quantity,
-          },
-        ],
-        { session }
-      );
+      const reservationData = {
+        product: item.product,
+        order: createdOrder._id,
+        user: req.user._id,
+        startDate: item.startDate,
+        endDate: item.endDate,
+        quantity: item.quantity,
+      };
+
+      if (useTransaction) {
+        await Reservation.create([reservationData], { session });
+      } else {
+        await Reservation.create(reservationData);
+      }
 
       // Create inventory ledger entry (append-only, negative delta for rental out)
-      await InventoryLedger.create(
-        [
-          {
-            product: item.product,
-            delta: -item.quantity, // Negative because items are rented out
-            reason: "Rental Out",
-            referenceType: "Order",
-            referenceId: createdOrder._id.toString(),
-            timestamp: new Date(),
-          },
-        ],
-        { session }
-      );
+      const ledgerData = {
+        product: item.product,
+        delta: -item.quantity, // Negative because items are rented out
+        reason: "Rental Out",
+        referenceType: "Order",
+        referenceId: createdOrder._id.toString(),
+        timestamp: new Date(),
+      };
+
+      if (useTransaction) {
+        await InventoryLedger.create([ledgerData], { session });
+      } else {
+        await InventoryLedger.create(ledgerData);
+      }
     }
 
-    await session.commitTransaction();
+    if (useTransaction) {
+      await session.commitTransaction();
+    }
 
     res.status(201).json({ success: true, data: createdOrder });
   } catch (error) {
