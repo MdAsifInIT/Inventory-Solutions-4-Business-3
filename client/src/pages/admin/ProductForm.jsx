@@ -92,9 +92,9 @@ export default function ProductForm() {
       };
 
       if (isEditMode) {
-        await axios.put(`/api/products/${id}`, payload);
+        await api.put(`/products/${id}`, payload);
       } else {
-        await axios.post("/api/products", payload);
+        await api.post("/products", payload);
       }
       navigate("/admin/products");
     } catch (err) {
