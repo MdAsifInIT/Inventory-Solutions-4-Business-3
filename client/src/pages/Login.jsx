@@ -1,18 +1,29 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { LogIn, Mail, Lock } from 'lucide-react';
+import Button from '../components/Button';
 
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
     const { login, error } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
         const success = await login(email, password);
+        setLoading(false);
+        
         if (success) {
+            toast.success('Welcome back!');
             navigate('/');
+        } else {
+            toast.error(error || 'Login failed. Please try again.');
         }
     };
 
