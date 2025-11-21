@@ -61,8 +61,9 @@ exports.createOrder = async (req, res, next) => {
 
     const createdOrder = await order.save({ session });
 
-    // 3. Create Reservation Records
+    // 3. Create Reservation Records & Inventory Ledger Entries
     for (const item of items) {
+      // Create reservation
       await Reservation.create(
         [
           {
@@ -72,6 +73,21 @@ exports.createOrder = async (req, res, next) => {
             startDate: item.startDate,
             endDate: item.endDate,
             quantity: item.quantity,
+          },
+        ],
+        { session }
+      );
+
+      // Create inventory ledger entry (append-only, negative delta for rental out)
+      await InventoryLedger.create(
+        [
+          {
+            product: item.product,
+            delta: -item.quantity, // Negative because items are rented out
+            reason: "Rental Out",
+            referenceType: "Order",
+            referenceId: createdOrder._id.toString(),
+            timestamp: new Date(),
           },
         ],
         { session }
