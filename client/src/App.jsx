@@ -110,6 +110,7 @@ function App() {
                         <Route path="customers" element={<CustomerList />} />
                     </Route>
                 </Routes>
+                </AnimatePresence>
             </Router>
         </CartProvider>
     </AuthProvider>
