@@ -88,15 +88,7 @@ exports.createOrder = async (req, res, next) => {
         timestamp: new Date(),
       };
 
-      if (useTransaction) {
-        await InventoryLedger.create([ledgerData], { session });
-      } else {
-        await InventoryLedger.create(ledgerData);
-      }
-    }
-
-    if (useTransaction) {
-      await session.commitTransaction();
+      await InventoryLedger.create(ledgerData);
     }
 
     res.status(201).json({ success: true, data: createdOrder });
