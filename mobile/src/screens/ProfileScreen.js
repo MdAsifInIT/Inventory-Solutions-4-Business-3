@@ -44,7 +44,12 @@ export default function ProfileScreen({ navigation }) {
                     
                     <TouchableOpacity 
                         className="flex-row justify-between items-center p-4 border-b border-gray-100 active:bg-gray-50"
-                        onPress={() => navigation.navigate('Orders')}
+                        onPress={() => {
+                            // Navigate to Orders tab
+                            if (navigation.getParent()) {
+                                navigation.getParent().navigate('Orders');
+                            }
+                        }}
                     >
                         <Text className="text-gray-700 text-base">My Orders</Text>
                         <Text className="text-gray-400">›</Text>
