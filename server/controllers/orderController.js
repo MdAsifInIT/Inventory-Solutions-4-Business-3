@@ -38,9 +38,7 @@ exports.createOrder = async (req, res, next) => {
         ],
       };
 
-      const overlappingReservations = useTransaction 
-        ? await Reservation.find(reservationQuery).session(session)
-        : await Reservation.find(reservationQuery);
+      const overlappingReservations = await Reservation.find(reservationQuery);
 
       const reservedQuantity = overlappingReservations.reduce(
         (acc, res) => acc + res.quantity,
