@@ -20,9 +20,7 @@ exports.createOrder = async (req, res, next) => {
 
     // 1. Validate Stock & Check Availability
     for (const item of items) {
-      const product = useTransaction 
-        ? await Product.findById(item.product).session(session)
-        : await Product.findById(item.product);
+      const product = await Product.findById(item.product);
         
       if (!product) {
         throw new Error(`Product not found: ${item.name}`);
