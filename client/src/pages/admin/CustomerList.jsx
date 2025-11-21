@@ -13,7 +13,7 @@ export default function CustomerList() {
 
     const fetchCustomers = async () => {
         try {
-            const { data } = await axios.get('/api/admin/customers');
+            const { data } = await api.get('/admin/customers');
             if (data.success) {
                 setCustomers(data.data);
             }
