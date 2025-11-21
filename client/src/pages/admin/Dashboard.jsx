@@ -15,7 +15,7 @@ export default function Dashboard() {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const { data } = await axios.get('/api/admin/stats');
+                const { data } = await api.get('/admin/stats');
                 if (data.success) {
                     setStats(data.data);
                 }
