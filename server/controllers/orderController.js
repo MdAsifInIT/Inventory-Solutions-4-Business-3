@@ -62,9 +62,7 @@ exports.createOrder = async (req, res, next) => {
       paymentMethod,
     });
 
-    const createdOrder = useTransaction 
-      ? await order.save({ session })
-      : await order.save();
+    const createdOrder = await order.save();
 
     // 3. Create Reservation Records & Inventory Ledger Entries (atomically)
     for (const item of items) {
