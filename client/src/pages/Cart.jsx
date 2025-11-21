@@ -1,6 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import toast from 'react-hot-toast';
 import { useCart } from '../context/CartContext';
-import { Trash2, Calendar } from 'lucide-react';
+import { Trash2, Calendar, ShoppingBag } from 'lucide-react';
+import Button from '../components/Button';
+import EmptyState from '../components/EmptyState';
 
 export default function Cart() {
     const { cart, removeFromCart, cartTotal } = useCart();
