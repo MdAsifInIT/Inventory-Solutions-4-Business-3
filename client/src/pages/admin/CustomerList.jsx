@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 import { Search } from 'lucide-react';
 
 export default function CustomerList() {
