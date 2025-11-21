@@ -142,16 +142,144 @@ const sendTokenResponse = async (user, statusCode, res, req) => {
     });
 };
 
-// @desc    Log user out / clear cookie
+// @desc    Refresh access token using refresh token
+// @route   POST /api/auth/refresh
+// @access  Public (but requires valid refresh token)
+exports.refreshToken = async (req, res, next) => {
+  try {
+    // Get refresh token from cookie or body
+    const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "No refresh token provided" 
+      });
+    }
+
+    // Verify refresh token
+    let decoded;
+    try {
+      decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    } catch (err) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "Invalid or expired refresh token" 
+      });
+    }
+
+    // Find user and check if refresh token exists in database
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "User not found" 
+      });
+    }
+
+    // Check if refresh token exists in user's refresh tokens
+    const tokenExists = user.refreshTokens.find(rt => rt.token === refreshToken);
+    if (!tokenExists) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "Refresh token not found or revoked" 
+      });
+    }
+
+    // Check if token is expired
+    if (tokenExists.expiresAt && new Date() > tokenExists.expiresAt) {
+      // Remove expired token
+      user.refreshTokens = user.refreshTokens.filter(rt => rt.token !== refreshToken);
+      await user.save();
+      return res.status(401).json({ 
+        success: false, 
+        error: "Refresh token expired" 
+      });
+    }
+
+    // Generate new tokens
+    const newAccessToken = generateAccessToken(user._id);
+    const newRefreshToken = generateRefreshToken(user._id);
+
+    // Get device and IP info
+    const deviceInfo = req.headers['user-agent'] || 'Unknown';
+    const ipAddress = req.ip || req.connection.remoteAddress || 'Unknown';
+
+    // Rotate refresh token: remove old, add new
+    user.refreshTokens = user.refreshTokens.filter(rt => rt.token !== refreshToken);
+    user.refreshTokens.push({
+      token: newRefreshToken,
+      deviceInfo,
+      ipAddress,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    });
+
+    // Limit stored refresh tokens
+    if (user.refreshTokens.length > 5) {
+      user.refreshTokens = user.refreshTokens.slice(-5);
+    }
+
+    await user.save();
+
+    // Send new tokens
+    const accessOptions = {
+      expires: new Date(Date.now() + 15 * 60 * 1000),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    };
+
+    const refreshOptions = {
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    };
+
+    res
+      .cookie("token", newAccessToken, accessOptions)
+      .cookie("refreshToken", newRefreshToken, refreshOptions)
+      .json({
+        success: true,
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// @desc    Log user out / clear cookie and revoke refresh token
 // @route   POST /api/auth/logout
 // @access  Private
 exports.logout = async (req, res, next) => {
-  res.cookie("token", "none", {
-    expires: new Date(Date.now() + 10 * 1000),
-    httpOnly: true,
-  });
+  try {
+    const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
 
-  res.status(200).json({ success: true, data: {} });
+    // Revoke refresh token from database
+    if (refreshToken && req.user) {
+      const user = await User.findById(req.user._id);
+      if (user) {
+        user.refreshTokens = user.refreshTokens.filter(rt => rt.token !== refreshToken);
+        await user.save();
+      }
+    }
+
+    // Clear cookies
+    res.cookie("token", "none", {
+      expires: new Date(Date.now() + 10 * 1000),
+      httpOnly: true,
+    });
+    
+    res.cookie("refreshToken", "none", {
+      expires: new Date(Date.now() + 10 * 1000),
+      httpOnly: true,
+    });
+
+    res.status(200).json({ success: true, data: {}, message: "Logged out successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 };
 
 // @desc    Get current logged in user
