@@ -48,10 +48,82 @@ export const api = axios.create({
   baseURL: API_URL,
 });
 
+// Token refresh mechanism
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(null);
+
+  // Setup axios interceptor for token refresh
+  useEffect(() => {
+    const interceptor = api.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const originalRequest = error.config;
+
+        if (error.response?.status === 401 && !originalRequest._retry) {
+          if (isRefreshing) {
+            return new Promise((resolve, reject) => {
+              failedQueue.push({ resolve, reject });
+            })
+              .then((token) => {
+                originalRequest.headers["Authorization"] = `Bearer ${token}`;
+                return api(originalRequest);
+              })
+              .catch((err) => Promise.reject(err));
+          }
+
+          originalRequest._retry = true;
+          isRefreshing = true;
+
+          try {
+            const refreshToken = await getItem("refreshToken");
+            if (refreshToken) {
+              const { data } = await axios.post(`${API_URL}/auth/refresh`, {
+                refreshToken,
+              });
+
+              if (data.success && data.accessToken) {
+                const newToken = data.accessToken;
+                await saveItem("token", newToken);
+                await saveItem("refreshToken", data.refreshToken);
+                setToken(newToken);
+                api.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
+                processQueue(null, newToken);
+                return api(originalRequest);
+              }
+            }
+          } catch (refreshError) {
+            processQueue(refreshError, null);
+            await logout();
+            return Promise.reject(refreshError);
+          } finally {
+            isRefreshing = false;
+          }
+        }
+
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      api.interceptors.response.eject(interceptor);
+    };
+  }, []);
 
   useEffect(() => {
     checkLoginStatus();
