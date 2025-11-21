@@ -118,10 +118,14 @@ exports.createOrder = async (req, res, next) => {
 
     res.status(201).json({ success: true, data: createdOrder });
   } catch (error) {
-    await session.abortTransaction();
+    if (useTransaction && session) {
+      await session.abortTransaction();
+    }
     next(error);
   } finally {
-    session.endSession();
+    if (session) {
+      session.endSession();
+    }
   }
 };
 
