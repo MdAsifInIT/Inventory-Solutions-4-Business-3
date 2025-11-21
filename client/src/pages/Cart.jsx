@@ -103,14 +103,19 @@ export default function Cart() {
                     </div>
                 </div>
 
-                <div className="lg:col-span-4">
-                    <div className="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
+                <motion.div 
+                    className="lg:col-span-4"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, delay: 0.2 }}
+                >
+                    <div className="bg-white shadow-sm rounded-lg border border-gray-200 p-6 sticky top-4">
                         <h2 className="text-lg font-medium text-gray-900 mb-4">Order Summary</h2>
                         <div className="flow-root">
                             <dl className="-my-4 text-sm divide-y divide-gray-200">
                                 <div className="py-4 flex items-center justify-between">
                                     <dt className="text-gray-600">Subtotal</dt>
-                                    <dd className="font-medium text-gray-900">₹{cartTotal}</dd>
+                                    <dd className="font-medium text-gray-900">₹{cartTotal.toFixed(2)}</dd>
                                 </div>
                                 <div className="py-4 flex items-center justify-between">
                                     <dt className="text-gray-600">Security Deposit (Refundable)</dt>
@@ -118,22 +123,32 @@ export default function Cart() {
                                 </div>
                                 <div className="py-4 flex items-center justify-between">
                                     <dt className="text-base font-bold text-gray-900">Order Total</dt>
-                                    <dd className="text-base font-bold text-gray-900">₹{cartTotal}</dd>
+                                    <dd className="text-base font-bold text-indigo-600">₹{cartTotal.toFixed(2)}</dd>
                                 </div>
                             </dl>
                         </div>
                         
                         <div className="mt-6">
-                            <button
+                            <Button
                                 onClick={() => navigate('/checkout')}
-                                className="w-full bg-indigo-600 border border-transparent rounded-md shadow-sm py-3 px-4 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                className="w-full"
+                                size="lg"
                             >
                                 Proceed to Checkout
-                            </button>
+                            </Button>
+                        </div>
+                        
+                        <div className="mt-4">
+                            <Link 
+                                to="/products" 
+                                className="block text-center text-indigo-600 text-sm hover:text-indigo-700 font-medium"
+                            >
+                                Continue Shopping
+                            </Link>
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </div>
-        </div>
+        </motion.div>
     );
 }
