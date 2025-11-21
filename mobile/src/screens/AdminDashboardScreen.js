@@ -40,11 +40,9 @@ export default function AdminDashboardScreen({ navigation }) {
 
     return (
         <SafeAreaView className="flex-1 bg-gray-50 px-4 pt-2">
-            <View className="flex-row justify-between items-center mb-6">
+            <View className="mb-6">
                 <Text className="text-2xl font-bold text-gray-900">Admin Dashboard</Text>
-                <TouchableOpacity onPress={logout}>
-                    <Text className="text-red-600 font-medium">Logout</Text>
-                </TouchableOpacity>
+                <Text className="text-gray-500 text-sm mt-1">Manage your rental business</Text>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -71,9 +69,14 @@ export default function AdminDashboardScreen({ navigation }) {
                     <Text className="text-lg font-bold text-gray-900 mb-3">Quick Actions</Text>
                     <TouchableOpacity 
                         className="bg-indigo-600 p-4 rounded-xl mb-3 flex-row items-center justify-center"
-                        onPress={() => navigation.navigate('Scanner')}
+                        onPress={() => {
+                            // Navigate to Scanner tab
+                            if (navigation.getParent()) {
+                                navigation.getParent().navigate('Scanner');
+                            }
+                        }}
                     >
-                        <Text className="text-white font-bold text-lg">Scan QR Code</Text>
+                        <Text className="text-white font-bold text-lg">📷 Scan QR Code</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
