@@ -76,11 +76,7 @@ exports.createOrder = async (req, res, next) => {
         quantity: item.quantity,
       };
 
-      if (useTransaction) {
-        await Reservation.create([reservationData], { session });
-      } else {
-        await Reservation.create(reservationData);
-      }
+      await Reservation.create(reservationData);
 
       // Create inventory ledger entry (append-only, negative delta for rental out)
       const ledgerData = {
