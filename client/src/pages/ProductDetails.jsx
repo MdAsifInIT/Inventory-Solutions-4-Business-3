@@ -36,18 +36,38 @@ export default function ProductDetails() {
         }
     };
 
+    useEffect(() => {
+        if (product && startDate && endDate) {
+            const price = calculateRentalPrice(startDate, endDate, product.pricing);
+            setEstimatedPrice(price * quantity);
+        }
+    }, [startDate, endDate, quantity, product]);
+
     const handleAddToCart = () => {
         if (!startDate || !endDate) {
-            alert('Please select rental dates');
+            toast.error('Please select rental dates');
             return;
         }
         
-        addToCart(product, quantity, startDate, endDate, product.pricing.day);
+        if (new Date(endDate) <= new Date(startDate)) {
+            toast.error('End date must be after start date');
+            return;
+        }
+        
+        addToCart(product, quantity, startDate, endDate, estimatedPrice / quantity);
+        toast.success(`${product.name} added to cart!`);
         navigate('/cart');
     };
 
-    if (loading) return <div className="p-8 text-center">Loading...</div>;
-    if (error || !product) return <div className="p-8 text-center text-red-500">Product not found</div>;
+    if (loading) return <ProductDetailSkeleton />;
+    if (error || !product) return (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+            <AlertCircle size={64} className="mx-auto text-red-500 mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Product Not Found</h2>
+            <p className="text-gray-500 mb-6">The product you're looking for doesn't exist.</p>
+            <Button onClick={() => navigate('/products')}>Back to Catalog</Button>
+        </div>
+    );
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
